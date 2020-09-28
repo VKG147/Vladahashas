@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.cpp
+vladahasher.h
+C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
+bitset
+-
+iostream
+-
+stack
+-
+
+C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
+string
+-
+sstream
+-
+
