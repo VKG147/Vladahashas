@@ -6,19 +6,19 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.cpp
-vladahasher.h
-C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
-bitset
--
+C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/main.cpp
 iostream
 -
-stack
--
+Vladahasher.h
+C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
 
 C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
 string
 -
 sstream
+-
+deque
+-
+bitset
 -
 

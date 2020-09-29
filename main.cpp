@@ -2,10 +2,7 @@
 #include "Vladahasher.h"
 
 int main(int argc, char** argv) {
-    std::cout << "Hello world!" << std::endl;
-
     Vladahasher vladahasher;
-    vladahasher.getHash("Labadiena aaaaaaaaaaabbbdaslndaskblasdsandasbldalkbaddwbada bkdwakbdawdnawkdawdawdablhdaldad ipuadsaoinaodasdasnasdasadasdasdadasdad");
-
+    std::cout << vladahasher.getHash("As einu miegotj");
     return 0;
 }
