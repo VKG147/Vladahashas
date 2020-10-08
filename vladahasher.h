@@ -18,6 +18,7 @@ private:
     void invertBitsInRange(std::bitset<kBlockSize>& bitBlock, const int & start, const int & end);
     void reverseBitsInRange(std::bitset<kBlockSize>& bitBlock, const int & start, const int & end);
 public:
-    std::string getHash(const std::string &);
-    std::string getHash(const std::stringstream &);
+    std::string getHash(const std::string & input);
+    std::string getHash(const std::stringstream & inputStream);
+    std::string getHashFromFile(const std::string & filePath);
 };

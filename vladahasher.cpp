@@ -1,5 +1,7 @@
 #include "vladahasher.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 std::string Vladahasher::hashToString(const std::bitset<kHashSize> &hash) {
     std::stringstream res;
@@ -39,6 +41,20 @@ std::string Vladahasher::getHash(const std::string & input) {
 
 std::string Vladahasher::getHash(const std::stringstream & inputStream) {
     return getHash(inputStream.str());
+}
+
+std::string Vladahasher::getHashFromFile(const std::string & filePath) {
+    std::ifstream inputFile(filepath);
+    std::string inputString = "";
+
+    if (sr) {
+        ostringstream ss;
+        ss << inputFile.rdbuf();
+        inputFile.close();
+        inputString = ss.str(); 
+    }
+
+    return getHash(inputString);
 }
 
 std::deque<std::bitset<Vladahasher::kHashSize>> Vladahasher::getHashBlocks(const std::bitset<kBlockSize> & bitBlock) {
