@@ -6,11 +6,13 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/main.cpp
+C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.cpp
+vladahasher.h
+C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
 iostream
 -
-Vladahasher.h
-C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
+fstream
+-
 
 C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
 string

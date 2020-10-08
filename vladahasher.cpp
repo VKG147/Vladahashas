@@ -1,14 +1,13 @@
 #include "vladahasher.h"
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 std::string Vladahasher::hashToString(const std::bitset<kHashSize> &hash) {
     std::stringstream res;
 
     for (int i = 0; i < kHashSize; i += 8) {
         std::bitset<4> hexChar;
-        for (int j = 0; j < 8; ++j) {
+        for (int j = 0; j < 4; ++j) {
             hexChar[j] = hash[i+j];
         }
 
@@ -24,17 +23,14 @@ std::string Vladahasher::getHash(const std::string & input) {
     for (int i = 0; i < bitBlocks.size(); ++i)
         shuffleBitBlock(bitBlocks[i]);
 
-    std::bitset<kHashSize> hash;
+    std::bitset<kHashSize> hash(0);
     for (int i = 0; i < bitBlocks.size(); ++i) {
         auto hashBlocks = getHashBlocks(bitBlocks[i]);
 
-        hash = std::bitset<kHashSize>(hashBlocks[0]);
-        for (auto j = 1; j < hashBlocks.size(); ++j) {
+        for (auto j = 0; j < hashBlocks.size(); ++j) {
             hash = getHashSum(hash, hashBlocks[j]);
         }
     }
-
-    std::cout << hash << std::endl;
 
     return hashToString(hash);
 }
@@ -44,11 +40,11 @@ std::string Vladahasher::getHash(const std::stringstream & inputStream) {
 }
 
 std::string Vladahasher::getHashFromFile(const std::string & filePath) {
-    std::ifstream inputFile(filepath);
+    std::ifstream inputFile(filePath);
     std::string inputString = "";
 
-    if (sr) {
-        ostringstream ss;
+    if (inputFile.is_open()) {
+        std::ostringstream ss;
         ss << inputFile.rdbuf();
         inputFile.close();
         inputString = ss.str(); 
@@ -107,6 +103,12 @@ std::deque<std::bitset<Vladahasher::kBlockSize>> Vladahasher::getBitBlocks(const
 }
 
 void Vladahasher::shuffleBitBlock(std::bitset<kBlockSize> &bitBlock) {
+    for (int i = 0; i < kShuffleCount; ++i) {
+        shuffleBitBlockHelper(bitBlock);
+    }
+}
+
+void Vladahasher::shuffleBitBlockHelper(std::bitset<kBlockSize> &bitBlock) {
     int sWidth = kBlockSize/2;
     while (sWidth > 1) {
         for (int i = sWidth; i < kBlockSize; i += sWidth) {
