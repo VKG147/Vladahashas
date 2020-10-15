@@ -58,18 +58,18 @@ int main(int argc, char** argv) {
 }
 
 void runAnalysis() {
-//    std::cout << "===INPUT ANY SIZE===\n";
-//    inputAnySize();
-//    std::cout << "\n===OUTPUT FIXED SIZE===\n";
-//    inputFixedSize();
-//    std::cout << "\n===OUTPUT IS DETERMINISTIC===\n";
-//    outputIsDeterministic();
+    std::cout << "===INPUT ANY SIZE===\n";
+    inputAnySize();
+    std::cout << "\n===OUTPUT FIXED SIZE===\n";
+    inputFixedSize();
+    std::cout << "\n===OUTPUT IS DETERMINISTIC===\n";
+    outputIsDeterministic();
     std::cout << "\n===HASH FUNCTION EFFECTIVENESS===\n";
     hashFunctionEffectiveness();
-//    std::cout << "\n===OUTPUT IS NOT SIMILAR===\n";
-//    outputNotSimilar();
-//    std::cout << "\n===COLLISION TESTING===\n";
-//    testForCollisions();
+    std::cout << "\n===OUTPUT IS NOT SIMILAR===\n";
+    outputNotSimilar();
+    std::cout << "\n===COLLISION TESTING===\n";
+    testForCollisions();
 }
 
 void inputAnySize() {
