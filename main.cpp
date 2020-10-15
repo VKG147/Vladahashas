@@ -21,7 +21,7 @@ void inputAnySize();
 void inputFixedSize();
 void outputIsDeterministic();
 void hashFunctionEffectiveness();
-void outputIndiscernible();
+void outputNotSimilar();
 void testForCollisions();
 void bruteForce(const std::string & hashToFind, int max_len, const std::string & cur);
 
@@ -67,7 +67,7 @@ void runAnalysis() {
     std::cout << "\n===HASH FUNCTION EFFECTIVENESS===\n";
     hashFunctionEffectiveness();
     std::cout << "\n===OUTPUT INDISCERNIBLE===\n";
-    outputIndiscernible();
+    outputNotSimilar();
 //    std::cout << "\n===COLLISION TESTING===\n";
 //    testForCollisions();
 }
@@ -122,7 +122,7 @@ void hashFunctionEffectiveness() {
     std::cout << "Total time to hash each line of konstitucija.txt: " << static_cast<double>(diff)/1000 << "s\n";
 }
 
-void outputIndiscernible() {
+void outputNotSimilar() {
     std::string str1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     std::string str2 = "aaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaa";
 
