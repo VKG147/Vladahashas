@@ -64,10 +64,10 @@ void runAnalysis() {
 //    inputFixedSize();
 //    std::cout << "\n===OUTPUT IS DETERMINISTIC===\n";
 //    outputIsDeterministic();
-//    std::cout << "\n===HASH FUNCTION EFFECTIVENESS===\n";
-//    hashFunctionEffectiveness();
-    std::cout << "\n===OUTPUT IS NOT SIMILAR===\n";
-    outputNotSimilar();
+    std::cout << "\n===HASH FUNCTION EFFECTIVENESS===\n";
+    hashFunctionEffectiveness();
+//    std::cout << "\n===OUTPUT IS NOT SIMILAR===\n";
+//    outputNotSimilar();
 //    std::cout << "\n===COLLISION TESTING===\n";
 //    testForCollisions();
 }
