@@ -58,15 +58,15 @@ int main(int argc, char** argv) {
 }
 
 void runAnalysis() {
-    std::cout << "===INPUT ANY SIZE===\n";
-    inputAnySize();
-    std::cout << "\n===OUTPUT FIXED SIZE===\n";
-    inputFixedSize();
-    std::cout << "\n===OUTPUT IS DETERMINISTIC===\n";
-    outputIsDeterministic();
-    std::cout << "\n===HASH FUNCTION EFFECTIVENESS===\n";
-    hashFunctionEffectiveness();
-    std::cout << "\n===OUTPUT INDISCERNIBLE===\n";
+//    std::cout << "===INPUT ANY SIZE===\n";
+//    inputAnySize();
+//    std::cout << "\n===OUTPUT FIXED SIZE===\n";
+//    inputFixedSize();
+//    std::cout << "\n===OUTPUT IS DETERMINISTIC===\n";
+//    outputIsDeterministic();
+//    std::cout << "\n===HASH FUNCTION EFFECTIVENESS===\n";
+//    hashFunctionEffectiveness();
+    std::cout << "\n===OUTPUT IS NOT SIMILAR===\n";
     outputNotSimilar();
 //    std::cout << "\n===COLLISION TESTING===\n";
 //    testForCollisions();
@@ -123,15 +123,12 @@ void hashFunctionEffectiveness() {
 }
 
 void outputNotSimilar() {
-    std::string str1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    std::string str2 = "aaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaaaaa";
-
-    std::string hash1 = vladahasher.getHash(str1);
-    std::string hash2 = vladahasher.getHash(str2);
+    std::string hash1 = vladahasher.getHashFromFile("input/test3_1.txt");
+    std::string hash2 = vladahasher.getHashFromFile("input/test3_2.txt");
 
     double diffPerc = 100*vladahasher.getHashDifference(hash1, hash2);
 
-    std::cout << "Hash of str1 differs from hash of str2 by " << diffPerc << "%\n";
+    std::cout << "Hash of test3_1.txt differs from hash of test3_2.txt by " << diffPerc << "%\n";
 }
 
 std::string challenger = "";
