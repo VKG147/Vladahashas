@@ -152,3 +152,31 @@ void Vladahasher::reverseBitsInRange(std::bitset<kBlockSize> &bitBlock, const in
         bitBlock[i] = tmp[end+start-i-1];
     }
 }
+
+std::bitset<Vladahasher::kHashSize> Vladahasher::hashStringToBitset(const std::string & hashString) {
+    if (hashString.length()*8 != kHashSize) return {};
+
+    std::bitset<kHashSize> hashBits(0);
+    for (int i = 0; i < hashString.length(); ++i) {
+        std::bitset<8> charBits(hashString[i]);
+
+        for (int j = 0; j < 8; ++j) {
+            hashBits[i*8+j] = charBits[j];
+        }
+    }
+
+    return hashBits;
+}
+
+double Vladahasher::getHashPercentageDifference(const std::string & h1, const std::string & h2) {
+    int bitDiff = 0;
+
+    std::bitset<kHashSize> h1Bits = hashStringToBitset(h1);
+    std::bitset<kHashSize> h2Bits = hashStringToBitset(h2);
+
+    for (int i = 0; i < kHashSize; ++i) {
+        if (!(h1Bits[i]&h2Bits[i])) bitDiff++;
+    }
+
+    return static_cast<double>(bitDiff) / kHashSize;
+}
