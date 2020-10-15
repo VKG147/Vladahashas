@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 void runAnalysis() {
     std::cout << "===INPUT ANY SIZE===\n";
     inputAnySize();
-    std::cout << "\nOUTPUT FIXED SIZE===\n";
+    std::cout << "\n===OUTPUT FIXED SIZE===\n";
     inputFixedSize();
     std::cout << "\n===OUTPUT IS DETERMINISTIC===\n";
     outputIsDeterministic();
@@ -89,7 +89,7 @@ void outputIsDeterministic() {
     std::string hash = vladahasher.getHash(str);
     bool det = true;
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 1000; ++i) {
         std::string new_hash = vladahasher.getHash(str);
         if (hash != new_hash) {
             det = false;
@@ -97,7 +97,10 @@ void outputIsDeterministic() {
         }
     }
 
-    if (det) std::cout << "Hash function is (most likely) deterministic\n";
+    if (det) {
+        std::cout << "Generated 1000 identical hashes from the same input\n";
+        std::cout << "Hash function is (most likely) deterministic\n";
+    }
     else std::cout << "Hash function is definitely not deterministic\n";
 }
 
