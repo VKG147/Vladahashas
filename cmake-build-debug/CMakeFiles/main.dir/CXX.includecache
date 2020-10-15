@@ -11,6 +11,10 @@ iostream
 -
 chrono
 -
+vector
+-
+fstream
+-
 Vladahasher.h
 C:/Users/vlada/Documents/Git/VU ISI/Vladahashas/vladahasher.h
 

@@ -1,8 +1,20 @@
 #include <iostream>
 #include <chrono>
+#include <vector>
+#include <fstream>
 #include "Vladahasher.h"
 
 Vladahasher vladahasher;
+
+const std::vector<std::string> testingPaths = {
+        "test1_1.txt",
+        "test1_2.txt",
+        "test2_1.txt",
+        "test2_2.txt",
+        "test3_1.txt",
+        "test3_2.txt",
+        "test4.txt"
+};
 
 void runAnalysis();
 void inputAnySize();
@@ -41,8 +53,6 @@ int main(int argc, char** argv) {
                 }
             }
         }
-
-
     }
     return 0;
 }
@@ -63,63 +73,53 @@ void runAnalysis() {
 }
 
 void inputAnySize() {
-    std::string str1('a', 1);
-    std::string str2('a', 10);
-    std::string str3('a', 1000);
-    std::string str4('a', 10000);
-    std::string str5('a', 100000);
-
-    std::cout << "Hash of str1: " << vladahasher.getHash(str1) << "\n";
-    std::cout << "Hash of str2: " << vladahasher.getHash(str2) << "\n";
-    std::cout << "Hash of str3: " << vladahasher.getHash(str3) << "\n";
-    std::cout << "Hash of str4: " << vladahasher.getHash(str4) << "\n";
-    std::cout << "Hash of str5: " << vladahasher.getHash(str5) << "\n";
+    for (auto it = testingPaths.begin(); it != testingPaths.end(); ++it) {
+        std::cout << "Hash of " << *it << ": " << vladahasher.getHashFromFile("input/" + *it) << "\n";
+    }
 }
 
 void inputFixedSize() {
-    std::string str1 = "sndasod asdaoida diaydbasidsadpnoa";
-    std::string str2 = "dasjknasnaksd dasad!!!@#@";
-
-    std::cout << "Hash length of str1: " << vladahasher.getHash(str1).length() << "\n";
-    std::cout << "Hash length of str2: " << vladahasher.getHash(str2).length() << "\n";
+    for (auto it = testingPaths.begin(); it != testingPaths.end(); ++it) {
+        std::cout << "Hash size (in bits) of " << *it << ": " << vladahasher.getHashFromFile("input/" + *it).length()*8 << "\n";
+    }
 }
 
 void outputIsDeterministic() {
-    std::string str = "aaaaaaaaaa string";
-    std::string hash = vladahasher.getHash(str);
-    bool det = true;
+    for (auto it = testingPaths.begin(); it != testingPaths.end(); ++it) {
+        std::string hash = vladahasher.getHashFromFile("input/" + *it);
 
-    for (int i = 0; i < 1000; ++i) {
-        std::string new_hash = vladahasher.getHash(str);
-        if (hash != new_hash) {
-            det = false;
-            break;
+        bool det = true;
+
+        for (int i = 0; i < 5; ++i) {
+            std::string new_hash = vladahasher.getHashFromFile("input/" + *it);
+            if (hash != new_hash) {
+                det = false;
+                break;
+            }
         }
-    }
 
-    if (det) {
-        std::cout << "Generated 1000 identical hashes from the same input\n";
-        std::cout << "Hash function is (most likely) deterministic\n";
+        if (det) std::cout << "Hashed "  << *it << " 5 times and the hash was the same throughout\n";
+        else std::cout << "Hashing not deterministic!\n";
     }
-    else std::cout << "Hash function is definitely not deterministic\n";
 }
 
 void hashFunctionEffectiveness() {
-    const unsigned int totalHashes = 100;
+    std::vector<std::string> lines;
+    std::string line;
+
+    std::ifstream sr("input/konstitucija.txt");
+    while (std::getline(sr, line)) {
+        lines.push_back(line);
+    } sr.close();
 
     auto begin = std::chrono::steady_clock::now();
-
-    std::string str = "a";
-    for (int i = 0; i < totalHashes; ++i) {
-        vladahasher.getHash(str);
-        str += "a";
+    for (auto it = lines.begin(); it != lines.end(); ++it) {
+        vladahasher.getHash(*it);
     }
-    std::string hash = vladahasher.getHash(str);
-
     auto end = std::chrono::steady_clock::now();
     auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(end-begin).count();
 
-    std::cout << "Average time of single hash: " << static_cast<double>(diff)/totalHashes << "ms\n";
+    std::cout << "Total time to hash each line of konstitucija.txt: " << static_cast<double>(diff)/1000 << "s\n";
 }
 
 void outputIndiscernible() {
