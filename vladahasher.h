@@ -7,8 +7,8 @@
 
 class Vladahasher {
 private:
-    static constexpr uint32_t kBlockSize = 256;
-    static constexpr uint32_t kHashSize = 128;
+    static constexpr uint32_t kBlockSize = 512;
+    static constexpr uint32_t kHashSize = 256;
     static constexpr uint32_t kShuffleCount = 4;
 
     std::bitset<kHashSize> getHashSum(const std::bitset<kHashSize> & hash1, const std::bitset<kHashSize> & hash2);
@@ -28,5 +28,5 @@ public:
     std::string getHash(const std::stringstream & inputStream);
     std::string getHashFromFile(const std::string & filePath);
 
-    double getHashPercentageDifference(const std::string & h1, const std::string & h2);
+    double getHashDifference(const std::string & h1, const std::string & h2);
 };

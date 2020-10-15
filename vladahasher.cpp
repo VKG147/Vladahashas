@@ -168,7 +168,7 @@ std::bitset<Vladahasher::kHashSize> Vladahasher::hashStringToBitset(const std::s
     return hashBits;
 }
 
-double Vladahasher::getHashPercentageDifference(const std::string & h1, const std::string & h2) {
+double Vladahasher::getHashDifference(const std::string & h1, const std::string & h2) {
     int bitDiff = 0;
 
     std::bitset<kHashSize> h1Bits = hashStringToBitset(h1);
