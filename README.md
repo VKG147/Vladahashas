@@ -4,10 +4,6 @@ This is a university project with the goal of creating a hashing function that a
 ## Hash function idea
 ![Hash function pseudocode](images/pseudocode.png)<br/>
 Here you can see some pseudocode that demonstrates how the hashing function works.<br/>
-1. Firstly, the hashing function itself takes an input of a string and then chops it up into large chunks (referred to as bitblocks) store in a ```std::deque<std::bitset<>>``` container.<br/>
-2. The bitblocks are divided into smaller and smaller partitions whose bits are either reversed or inverted.<br/>
-3. A similar process occurs, but with a slightly different approach: it iterates through each bit and reverses bits on one side of it, and inverts them on the other depending on whether the bit is 1 or 0.<br/>
-4. This process is repeated for (currently) 4 times to achieve a satisfactory avalanche effect.
 
 ## Experimentational analysis
 Analysis was done to test and confirm the following standards for the hashing function:
@@ -35,12 +31,16 @@ Confirmed, output is of fixed size (256 bits).
 Confirmed, output stays the same for the same input.
 ### Hashing function is efficient
 ![Console output](images/hashefficiency.png)<br/>
-The design of the algorithm limits the hashing function to O(n^2) complexity, thus the function is not efficient.
+The algorithm has a complexity of O(n), therefore it is fairly efficient.
 ### Two hashes from similar strings should differ vastly
 ![Console output](images/outputvastlydifferent.png)<br/>
 Confirmed, the outputs differ vastly even thought the input is similar.
 ### Collisions unfeasible to find
-This has yet to be tested.
+![Console output](images/paircollisions.png)<br/>
+Out of 100,000 pairs 0 collisions have been found. Collisions are fairly unfeasible to find.
+
+### Average difference between similar pairs
+![Console output](images/pairdifference.png)<br/>
 
 ## Conclusions
-The hashing algorithm meets most of the requirements except time efficiency, it is not efficient at all. Also, it has not yet been tested for collisions, so that part is unknown as well.
+The hashing algorithm meets all of the mentioned requirements. It is efficient, deterministic, collisions are also difficult to find.
