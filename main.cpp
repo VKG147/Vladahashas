@@ -127,7 +127,7 @@ void inputAnySize() {
 
 void inputFixedSize() {
     for (auto it = testingPaths.begin(); it != testingPaths.end(); ++it) {
-        std::cout << "Hash size (in bits) of " << *it << ": " << vladahasher.getHashFromFile("input/" + *it).length()*8 << "\n";
+        std::cout << "Hash size (in bits) of " << *it << ": " << vladahasher.getHashFromFile("input/" + *it).length()*4 << "\n";
     }
 }
 
