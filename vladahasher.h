@@ -4,29 +4,50 @@
 #include <sstream>
 #include <deque>
 #include <bitset>
+#include <cmath>
+#include <limits>
+#include <iomanip>
 
 class Vladahasher {
 private:
-    static constexpr uint32_t kBlockSize = 512;
-    static constexpr uint32_t kHashSize = 256;
-    static constexpr uint32_t kShuffleCount = 4;
+    static constexpr uint32_t kHashSize = 512;
 
-    std::bitset<kHashSize> getHashSum(const std::bitset<kHashSize> & hash1, const std::bitset<kHashSize> & hash2);
+    const uint32_t kContants[8] = {
+            static_cast<uint32_t>((sqrt(2)/ceil(sqrt(2)))*(std::numeric_limits<uint32_t>::max())),
+            static_cast<uint32_t>((sqrt(3)/ceil(sqrt(3)))*(std::numeric_limits<uint32_t>::max())),
+            static_cast<uint32_t>((sqrt(5)/ceil(sqrt(5)))*(std::numeric_limits<uint32_t>::max())),
+            static_cast<uint32_t>((sqrt(7)/ceil(sqrt(7)))*(std::numeric_limits<uint32_t>::max())),
+            static_cast<uint32_t>((sqrt(11)/ceil(sqrt(11)))*(std::numeric_limits<uint32_t>::max())),
+            static_cast<uint32_t>((sqrt(13)/ceil(sqrt(13)))*(std::numeric_limits<uint32_t>::max())),
+            static_cast<uint32_t>((sqrt(17)/ceil(sqrt(17)))*(std::numeric_limits<uint32_t>::max())),
+            static_cast<uint32_t>((sqrt(19)/ceil(sqrt(17)))*(std::numeric_limits<uint32_t>::max())),
+    };
+
+    // Helper methods
+    uint32_t rotr(uint32_t word, int32_t shift);
+    uint32_t choice(uint32_t w1, uint32_t w2, uint32_t w3);
+    uint32_t maj(uint32_t w1, uint32_t w2, uint32_t w3);
+
+    uint32_t op1(uint32_t word);
+    uint32_t op2(uint32_t word);
+    uint32_t op3(uint32_t word);
+    uint32_t op4(uint32_t word);
+
+    std::deque<std::deque<uint32_t>> getWordBlocks(const std::string & input);
+    std::deque<uint32_t> getMessageSchedule(const std::deque<uint32_t>& words);
+
+    // string -> vector<int[16]
+
+    // Utility methods
     std::string hashToString(const std::bitset<kHashSize> & hash);
-
-    std::deque<std::bitset<kHashSize>> getHashBlocks(const std::bitset<kBlockSize> & bitBlock);
-    std::deque<std::bitset<kBlockSize>> getBitBlocks(const std::string &);
-
     std::bitset<kHashSize> hashStringToBitset(const std::string & hashString);
-
-    void shuffleBitBlock(std::bitset<kBlockSize>& bitBlock);
-    void shuffleBitBlockHelper(std::bitset<kBlockSize>& bitBlock);
-    void invertBitsInRange(std::bitset<kBlockSize>& bitBlock, const int & start, const int & end);
-    void reverseBitsInRange(std::bitset<kBlockSize>& bitBlock, const int & start, const int & end);
 public:
+
+
     std::string getHash(const std::string & input);
     std::string getHash(const std::stringstream & inputStream);
     std::string getHashFromFile(const std::string & filePath);
 
     double getHashDifference(const std::string & h1, const std::string & h2);
+    double getHashDifferenceHex(const std::string & h1, const std::string & h2);
 };

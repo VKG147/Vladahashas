@@ -2,37 +2,193 @@
 #include <iostream>
 #include <fstream>
 
-std::string Vladahasher::hashToString(const std::bitset<kHashSize> &hash) {
-    std::stringstream res;
+uint32_t Vladahasher::rotr(uint32_t word, int32_t shift) {
+    int s = shift>=0? shift%32 : -((-shift)%32);
+    return (word>>shift) | (word<<(32-shift));
+}
 
-    for (int i = 0; i < kHashSize; i += 8) {
-        std::bitset<4> hexChar;
-        for (int j = 0; j < 4; ++j) {
-            hexChar[j] = hash[i+j];
+std::deque<std::deque<uint32_t>> Vladahasher::getWordBlocks(const std::string & input) {
+    std::deque<std::deque<uint32_t>> wordBlocks;
+
+    if (input.length() == 0) {
+        std::deque<uint32_t> wordBlock;
+        wordBlock.push_back(0);
+        wordBlock.push_back(1);
+        while (wordBlock.size() < 16) {
+            wordBlock.push_back(0);
         }
-
-        res << std::hex << std::uppercase << hexChar.to_ulong();
+        wordBlocks.push_back(wordBlock);
     }
 
-    return res.str();
+    std::deque<std::bitset<8>> strBits8;
+    for (int i = 0; i < input.length(); ++i) {
+        std::bitset<8> charBits(input[i]);
+        strBits8.push_back(charBits);
+    }
+
+    std::deque<std::bitset<32>> strBits32;
+    for (int i = 0; i < strBits8.size(); i+=4) {
+        std::bitset<32> bits32(0);
+        for (int j = i; j-i < 4 && j < strBits8.size(); ++j) {
+            for (int k = 0; k < 8; ++k) {
+                bits32[(j-i)*8+k] = strBits8[j][k];
+            }
+        }
+        strBits32.push_back(bits32);
+    }
+
+    strBits8.clear();
+
+    std::deque<uint32_t> wordBlock;
+    for (int i = 0; i < strBits32.size(); i+=16) {
+        for (int j = i; j - i < 16 && j < strBits32.size(); ++j) {
+            wordBlock.push_back(static_cast<int>(strBits32[j].to_ulong()));
+        }
+
+        if (wordBlock.size() < 15)
+            wordBlock.push_back(1);
+
+        while (wordBlock.size() < 16) {
+            if (wordBlock.size() == 15) {
+                wordBlock.push_back(input.length());
+            }
+            else {
+                wordBlock.push_back(0);
+            }
+        }
+
+        wordBlocks.push_back(wordBlock);
+        wordBlock.clear();
+    }
+
+    return wordBlocks;
+}
+
+std::deque<uint32_t> Vladahasher::getMessageSchedule(const std::deque<uint32_t>& words) {
+    std::deque<uint32_t> ms(words);
+
+
+
+    for (int i = words.size(); i < 64; ++i) {
+        uint32_t word = op1(ms[i-16]) + ms[i-12] + op2(ms[i-7]) + ms[i-3];
+        ms.push_back(word);
+    }
+
+    return ms;
+}
+
+uint32_t Vladahasher::op1(uint32_t word) {
+    uint32_t a = rotr(word, 14);
+    uint32_t b = word >> 3;
+    uint32_t c = rotr(word, 7);
+
+    return a^b^c;
+}
+uint32_t Vladahasher::op2(uint32_t word) {
+    uint32_t a = word >> 7;
+    uint32_t b = rotr(word, 20);
+    uint32_t c = rotr(word, 17);
+
+    return a^b^c;
+}
+uint32_t Vladahasher::op3(uint32_t word) {
+    uint32_t a = rotr(word, 2);
+    uint32_t b = rotr(word, 7);
+    uint32_t c = rotr(word, 21);
+
+    return a^b^c;
+}
+uint32_t Vladahasher::op4(uint32_t word) {
+    uint32_t a = rotr(word, 15);
+    uint32_t b = rotr(word, 13);
+    uint32_t c = rotr(word, 2);
+
+    return a^b^c;
+}
+
+uint32_t Vladahasher::choice(uint32_t w1, uint32_t w2, uint32_t w3) {
+    std::bitset<32> b1(w1);
+    std::bitset<32> b2(w2);
+    std::bitset<32> b3(w3);
+    std::bitset<32> b;
+
+    for (int i = 0; i < 32; ++i) {
+        if (b1[i]) b[i] = b2[i];
+        else b[i] = b3[i];
+    }
+
+    return static_cast<uint32_t>(b.to_ulong());
+}
+
+uint32_t Vladahasher::maj(uint32_t w1, uint32_t w2, uint32_t w3) {
+    std::bitset<32> b1(w1);
+    std::bitset<32> b2(w2);
+    std::bitset<32> b3(w3);
+    std::bitset<32> b;
+
+    for (int i = 0; i < 32; ++i) {
+        if ((b1[i]&&b2[i])||(b1[i]&&b3[i])||(b2[i]&&b3[i]))
+            b[i] = 1;
+        else b[i] = 0;
+    }
+
+    return static_cast<uint32_t>(b.to_ulong());
 }
 
 std::string Vladahasher::getHash(const std::string & input) {
-    std::deque<std::bitset<kBlockSize>> bitBlocks = getBitBlocks(input);
+    auto wordBlocks = getWordBlocks(input);
 
-    for (int i = 0; i < bitBlocks.size(); ++i)
-        shuffleBitBlock(bitBlocks[i]);
+    uint32_t hash[8] = { // No avalanche
+            static_cast<uint32_t>(sqrt(2)*pow(2, 32)),
+            static_cast<uint32_t>(sqrt(3)*pow(2, 32)),
+            static_cast<uint32_t>(sqrt(5)*pow(2, 32)),
+            static_cast<uint32_t>(sqrt(7)*pow(2, 32)),
+            static_cast<uint32_t>(sqrt(11)*pow(2, 32)),
+            static_cast<uint32_t>(sqrt(13)*pow(2, 32)),
+            static_cast<uint32_t>(sqrt(17)*pow(2, 32)),
+            static_cast<uint32_t>(sqrt(19)*pow(2, 32)),
+    };
+    for (int i = 0; i < wordBlocks.size(); ++i) {
+        std::deque<uint32_t> ms = getMessageSchedule(wordBlocks[i]);
 
-    std::bitset<kHashSize> hash(0);
-    for (int i = 0; i < bitBlocks.size(); ++i) {
-        auto hashBlocks = getHashBlocks(bitBlocks[i]);
+        uint32_t t1, t2;
+        for (int j = 0; j < ms.size(); ++j) {
+            t1 = op3(hash[4]) + choice(hash[4], hash[5], hash[6]) + hash[7] + ms[j] + kContants[j%8];
+            t2 = op4(hash[0]) + maj(hash[0], hash[1], hash[2]);
 
-        for (auto j = 0; j < hashBlocks.size(); ++j) {
-            hash = getHashSum(hash, hashBlocks[j]);
+            for (int k = 1; k < 8; ++k) {
+                hash[k] = hash[k-1];
+            }
+
+            hash[0] = t1 + t2;
+            hash[4] += t1;
+        }
+
+
+        for (int j = 0; j < ms.size(); ++j) {
+            hash[j%8] ^= ms[j] ^ kContants[j%8];
         }
     }
 
-    return hashToString(hash);
+    std::string hashStr = "";
+    for (int i = 0; i < 8; ++i) {
+        std::bitset<32> word(hash[i]);
+        for (int j = 0; j < 8; ++j) {
+            std::bitset<4> hexChar(0);
+            for (int k = 0; k < 4; ++k) {
+                hexChar[k] = word[j*4+k];
+            }
+            std::stringstream sr;
+            sr << std::hex << hexChar.to_ulong();
+            hashStr += sr.str();
+            sr.clear();
+
+        }
+
+
+    }
+
+    return hashStr;
 }
 
 std::string Vladahasher::getHash(const std::stringstream & inputStream) {
@@ -53,104 +209,19 @@ std::string Vladahasher::getHashFromFile(const std::string & filePath) {
     return getHash(inputString);
 }
 
-std::deque<std::bitset<Vladahasher::kHashSize>> Vladahasher::getHashBlocks(const std::bitset<kBlockSize> & bitBlock) {
-    std::deque<std::bitset<kHashSize>> hashBlocks;
+std::string Vladahasher::hashToString(const std::bitset<kHashSize> &hash) {
+    std::stringstream res;
 
-    for (int i = 0; i < kBlockSize; i += kHashSize) {
-        std::bitset<kHashSize> hashBlock;
-        for (int j = i; j < i + kHashSize; ++j) {
-            hashBlock[j-i] = bitBlock[j];
-        }
-        hashBlocks.push_back(hashBlock);
-    }
-
-    return hashBlocks;
-}
-
-std::bitset<Vladahasher::kHashSize> Vladahasher::getHashSum(const std::bitset<kHashSize> & hash1, const std::bitset<kHashSize> & hash2) {
-    std::bitset<kHashSize> hashSum(0);
-
-    bool carry = false;
-    for (int i = 0; i < kHashSize; ++i) {
-        hashSum[i] = (hash1[i]^hash2[i])^carry;
-        carry = (hash1[i]&hash2[i])|(hash1[i]&carry)|(hash2[i]&carry);
-    }
-
-    return hashSum;
-}
-
-std::deque<std::bitset<Vladahasher::kBlockSize>> Vladahasher::getBitBlocks(const std::string & input) {
-    std::deque<std::bitset<kBlockSize>> bitBlocks;
-
-    int i = 0, blockCount = 0;
-    do {
-        std::bitset<kBlockSize> bitBlock;
-
-        for (; i + blockCount*(kBlockSize/8) < input.length() && i < kBlockSize/8; i++) {
-            std::bitset<8> character(input[i+blockCount*(kBlockSize/8)]);
-
-            for (int j = 0; j < 8; ++j) {
-                bitBlock[i*8 + j] = character[j];
-            }
+    for (int i = 0; i < kHashSize; i += 8) {
+        std::bitset<4> hexChar;
+        for (int j = 0; j < 4; ++j) {
+            hexChar[j] = hash[i+j];
         }
 
-        bitBlocks.push_back(bitBlock);
-        blockCount++;
-        i = 0;
-    } while (i + blockCount*(kBlockSize/8) < input.length());
-
-    return bitBlocks;
-}
-
-void Vladahasher::shuffleBitBlock(std::bitset<kBlockSize> &bitBlock) {
-    for (int i = 0; i < kShuffleCount; ++i) {
-        shuffleBitBlockHelper(bitBlock);
-    }
-}
-
-void Vladahasher::shuffleBitBlockHelper(std::bitset<kBlockSize> &bitBlock) {
-    int sWidth = kBlockSize/2;
-    while (sWidth > 1) {
-        for (int i = sWidth; i < kBlockSize; i += sWidth) {
-            int left = i - 1, right = i;
-
-            invertBitsInRange(bitBlock, left-sWidth+1, left+1);
-            if (bitBlock[left]) {
-                reverseBitsInRange(bitBlock, left-sWidth+1, left+1);
-            }
-            invertBitsInRange(bitBlock, right, right+sWidth);
-            if (bitBlock[right]) {
-                reverseBitsInRange(bitBlock, right, right+sWidth);
-            }
-        }
-        sWidth /= 2;
+        res << std::hex << std::uppercase << hexChar.to_ulong();
     }
 
-    for (int i = 0; i < kBlockSize; ++i) {
-        if (bitBlock[i]) {
-            invertBitsInRange(bitBlock, 0, i);
-            reverseBitsInRange(bitBlock, i + 1, kBlockSize);
-        }
-        else {
-            reverseBitsInRange(bitBlock, 0, i);
-            invertBitsInRange(bitBlock, i + 1, kBlockSize);
-        }
-    }
-}
-
-void Vladahasher::invertBitsInRange(std::bitset<kBlockSize> &bitBlock, const int &start, const int &end) {
-    if (start < 0 || start >= kBlockSize || end < 0 || end > kBlockSize) return;
-    for (int i = start; i < end; ++i) {
-        bitBlock[i] = ~bitBlock[i];
-    }
-}
-
-void Vladahasher::reverseBitsInRange(std::bitset<kBlockSize> &bitBlock, const int &start, const int &end) {
-    std::bitset<kBlockSize> tmp(bitBlock);
-    if (start < 0 || start >= kBlockSize || end < 0 || end > kBlockSize) return;
-    for (int i = start; i < end; ++i) {
-        bitBlock[i] = tmp[end+start-i-1];
-    }
+    return res.str();
 }
 
 std::bitset<Vladahasher::kHashSize> Vladahasher::hashStringToBitset(const std::string & hashString) {
@@ -179,4 +250,15 @@ double Vladahasher::getHashDifference(const std::string & h1, const std::string 
     }
 
     return static_cast<double>(bitDiff) / kHashSize;
+}
+
+double Vladahasher::getHashDifferenceHex(const std::string &h1, const std::string &h2){
+    int hexDiff = 0;
+
+    for (int i = 0; i < h1.length(); ++i) {
+        if (h1[i] != h2[i])
+            hexDiff++;
+    }
+
+    return static_cast<double>(hexDiff)/h1.length();
 }

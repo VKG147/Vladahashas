@@ -2,6 +2,8 @@
 #include <chrono>
 #include <vector>
 #include <fstream>
+#include <random>
+#include <functional>
 #include "Vladahasher.h"
 
 Vladahasher vladahasher;
@@ -23,7 +25,49 @@ void outputIsDeterministic();
 void hashFunctionEffectiveness();
 void outputNotSimilar();
 void testForCollisions();
-void bruteForce(const std::string & hashToFind, int max_len, const std::string & cur);
+void testDifference();
+
+void genFile() {
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(33,126);
+    auto getRand = std::bind(distribution, generator);
+
+    std::ofstream sw("collisionTest.txt");
+
+    for (int i = 0; i < 25000; ++i) {
+        std::string p1 = "", p2 = "";
+
+        for (int j = 0; j < 10; ++j) {
+            p1 += (char)getRand();
+            p2 += (char)getRand();
+        }
+        sw << p1 << " " << p2 << "\n";
+        p1 = ""; p2 = "";
+
+        for (int j = 0; j < 100; ++j) {
+            p1 += (char)getRand();
+            p2 += (char)getRand();
+        }
+        sw << p1 << " " << p2 << "\n";
+        p1 = ""; p2 = "";
+
+        for (int j = 0; j < 500; ++j) {
+            p1 += (char)getRand();
+            p2 += (char)getRand();
+        }
+        sw << p1 << " " << p2 << "\n";
+        p1 = ""; p2 = "";
+
+        for (int j = 0; j < 1000; ++j) {
+            p1 += (char)getRand();
+            p2 += (char)getRand();
+        }
+        sw << p1 << " " << p2 << "\n";
+        p1 = ""; p2 = "";
+    }
+
+    sw.close();
+}
 
 int main(int argc, char** argv) {
     if (argc >= 2) {
@@ -36,6 +80,7 @@ int main(int argc, char** argv) {
         if (input == "y" || input == "Y")
             runAnalysis();
         else {
+            input = "";
             std::cout << "Welcome to Vladahashas. Enter text surrounded by \" to get a hash. Type \"quit\" without quotes to quit\n";
             while (true) {
                 std::cout << "Please enter a string: ";
@@ -68,6 +113,8 @@ void runAnalysis() {
     hashFunctionEffectiveness();
     std::cout << "\n===OUTPUT IS NOT SIMILAR===\n";
     outputNotSimilar();
+    std::cout << "\n===TEST DIFFERENCE===\n";
+    testDifference();
     std::cout << "\n===COLLISION TESTING===\n";
     testForCollisions();
 }
@@ -90,7 +137,7 @@ void outputIsDeterministic() {
 
         bool det = true;
 
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 100; ++i) {
             std::string new_hash = vladahasher.getHashFromFile("input/" + *it);
             if (hash != new_hash) {
                 det = false;
@@ -98,7 +145,7 @@ void outputIsDeterministic() {
             }
         }
 
-        if (det) std::cout << "Hashed "  << *it << " 5 times and the hash was the same throughout\n";
+        if (det) std::cout << "Hashed "  << *it << " 100 times and the hash was the same throughout\n";
         else std::cout << "Hashing not deterministic!\n";
     }
 }
@@ -131,39 +178,48 @@ void outputNotSimilar() {
     std::cout << "Hash of test3_1.txt differs from hash of test3_2.txt by " << diffPerc << "%\n";
 }
 
-std::string challenger = "";
-std::string strToAttack = "IamC";
-bool hashMatchFound = false;
-unsigned long long total_attempted = 0;
 void testForCollisions() {
-    std::string hashToCollideWith = vladahasher.getHash(strToAttack);
+    std::ifstream sr("collisionTest.txt");
 
-    std::cout << "=" << hashToCollideWith << "\n";
+    int colls = 0;
 
-    bruteForce(hashToCollideWith, 4, "");
+    while (!sr.eof()) {
+        std::string a, b;
+        sr >> a >> b;
 
-    if (hashMatchFound) {
-        std::cout << "Hash collision found after " << total_attempted << " attempts\n";
-        std::cout << strToAttack << " collides with " << challenger << "\n";
+        if (vladahasher.getHash(a) == vladahasher.getHash(b) && a != "" && b != "") {
+            colls++;
+        }
     }
-    else {
-        std::cout << "No collisions found after " << total_attempted << " attempts\n";
-    }
+
+    std::cout << colls << " collisions found out of 100,000 pairs" << std::endl;
+
+    sr.close();
 }
 
-void bruteForce(const std::string & hashToFind, int max_len, const std::string & cur) {
-    if (vladahasher.getHash(cur) == hashToFind && cur != strToAttack) {
-        hashMatchFound = true;
-        challenger = cur;
-        return;
+void testDifference() {
+    std::ifstream sr("diffTest.txt");
+
+    double diffBitSum = 0, diffHexSum = 0;
+    int diffCount = 0;
+
+    while (!sr.eof()) {
+        std::string a, b;
+        sr >> a >> b;
+
+        if (a != "" && b != "") {
+            std::string h1 = vladahasher.getHash(a);
+            std::string h2 = vladahasher.getHash(b);
+
+            diffBitSum += vladahasher.getHashDifference(h1, h2);
+            diffHexSum += vladahasher.getHashDifferenceHex(h1, h2);
+            diffCount++;
+        }
     }
-    if(cur.length() == max_len) {
-        return;
-    }
-    for(int c = 1; c < 256; ++c) {
-        std::string next = cur + (char)c;
-        total_attempted++;
-        bruteForce(hashToFind, max_len, next);
-        if (hashMatchFound) return;
-    }
+
+    std::cout << "Average hash difference out of 100,000 pairs was:\n";
+    std::cout << 100*(diffBitSum/diffCount) << "% in bit level\n";
+    std::cout << 100*(diffHexSum/diffCount) << "% in hex level\n";
+
+    sr.close();
 }
